@@ -151,9 +151,46 @@ export const TerminalPuzzle = ({ onComplete }: TerminalPuzzleProps) => {
       return;
     }
 
+    // Cheat code
+    if (trimmedCmd === "sudo skip_all") {
+      const allFiles = ["feelings.txt", "reasons.js", "confession.md", "final_key.enc"];
+      setDecodedFiles(allFiles);
+      setLines([
+        ...newLines,
+        "Running bypass protocol...",
+        "████████████████████ 100%",
+        "All security layers bypassed.",
+        "✓ Terminal challenge complete!",
+        "",
+        "[Press Enter to continue...]",
+      ]);
+      setIsComplete(true);
+      setInput("");
+      return;
+    }
+
     // Track decoded files
     if (trimmedCmd.startsWith("decode ")) {
       const file = trimmedCmd.replace("decode ", "");
+      
+      // Check if it's the final key and if other files are decoded
+      if (file === "final_key.enc") {
+        const requiredFiles = ["feelings.txt", "reasons.js", "confession.md"];
+        const missingFiles = requiredFiles.filter(f => !decodedFiles.includes(f));
+        
+        if (missingFiles.length > 0) {
+          setLines([
+            ...newLines,
+            "Error: Security protocol violation.",
+            `The final key is locked behind ${missingFiles.length} remaining encrypted layers.`,
+            `Missing files: ${missingFiles.join(", ")}`,
+            "",
+          ]);
+          setInput("");
+          return;
+        }
+      }
+
       if (!decodedFiles.includes(file) && COMMANDS[trimmedCmd]) {
         setDecodedFiles([...decodedFiles, file]);
       }
